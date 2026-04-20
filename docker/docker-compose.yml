@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.4
+    # Wpisuję nazwę na sztywno, żeby Docker przestał pyskować
+    container_name: mysql_db_spring
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      # Te dane Spring i tak pobierze z .env, ale dla Dockera
+      # warto upewnić się, że Twój .env je zawiera
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Europe/Warsaw
+    ports:
+      - "3306:3306"
+    command:
+      [
+        "mysqld",
+        "--character-set-server=utf8mb4",
+        "--collation-server=utf8mb4_0900_ai_ci"
+      ]
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # UWAGA: Jeśli nie masz folderu 'initdb', zakomentuj linię poniżej znakiem #
+      # - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  mysql_data:

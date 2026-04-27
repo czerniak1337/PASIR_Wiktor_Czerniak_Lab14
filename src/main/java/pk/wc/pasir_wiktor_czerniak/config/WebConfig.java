@@ -1,4 +1,4 @@
-package pk.wc.pasir_wiktor_czerniak;
+package pk.wc.pasir_wiktor_czerniak.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

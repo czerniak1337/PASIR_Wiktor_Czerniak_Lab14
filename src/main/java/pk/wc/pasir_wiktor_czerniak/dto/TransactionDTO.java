@@ -1,9 +1,9 @@
-package pk.wc.PASIR_Wiktor_Czerniak.dto;
+package pk.wc.pasir_wiktor_czerniak.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
-import pk.wc.PASIR_Wiktor_Czerniak.model.TransactionType;
+import pk.wc.pasir_wiktor_czerniak.model.TransactionType;
 
 @Getter
 @Setter

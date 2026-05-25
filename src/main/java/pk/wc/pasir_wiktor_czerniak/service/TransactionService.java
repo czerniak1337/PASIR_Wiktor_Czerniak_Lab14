@@ -1,9 +1,13 @@
-package pk.wc.PASIR_Wiktor_Czerniak.service;
+package pk.wc.pasir_wiktor_czerniak.service;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import pk.wc.PASIR_Wiktor_Czerniak.dto.TransactionDTO;
-import pk.wc.PASIR_Wiktor_Czerniak.model.Transaction;
-import pk.wc.PASIR_Wiktor_Czerniak.repository.TransactionRepository;
+import pk.wc.pasir_wiktor_czerniak.dto.TransactionDTO;
+import pk.wc.pasir_wiktor_czerniak.model.Transaction;
+import pk.wc.pasir_wiktor_czerniak.model.User;
+import pk.wc.pasir_wiktor_czerniak.repository.TransactionRepository;
+import pk.wc.pasir_wiktor_czerniak.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,43 +17,98 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
 
+    private final UserRepository userRepository;
+
     public TransactionService(
-            TransactionRepository transactionRepository) {
+            TransactionRepository transactionRepository,
+            UserRepository userRepository) {
 
         this.transactionRepository = transactionRepository;
+        this.userRepository = userRepository;
+    }
+
+    private User getCurrentUser() {
+
+        Authentication auth =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        String email = auth.getName();
+
+        return userRepository
+                .findByEmail(email)
+                .orElseThrow();
     }
 
     public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+
+        User user = getCurrentUser();
+
+        return transactionRepository.findByUser(user);
     }
 
     public Transaction getTransactionById(Long id) {
 
-        return transactionRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Nie znaleziono transakcji"));
+        Transaction transaction =
+                transactionRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Nie znaleziono transakcji"
+                                ));
+
+        if (!transaction.getUser().getEmail()
+                .equals(getCurrentUser().getEmail())) {
+
+            throw new SecurityException(
+                    "Brak dostępu do transakcji"
+            );
+        }
+
+        return transaction;
     }
 
-    public Transaction createTransaction(TransactionDTO dto) {
+    public Transaction createTransaction(
+            TransactionDTO dto) {
 
-        Transaction transaction = new Transaction();
+        Transaction transaction =
+                new Transaction();
 
         transaction.setAmount(dto.getAmount());
         transaction.setType(dto.getType());
         transaction.setTags(dto.getTags());
         transaction.setNotes(dto.getNotes());
-        transaction.setTimestamp(LocalDateTime.now());
+        transaction.setTimestamp(
+                LocalDateTime.now()
+        );
 
-        return transactionRepository.save(transaction);
+        transaction.setUser(
+                getCurrentUser()
+        );
+
+        return transactionRepository
+                .save(transaction);
     }
 
-    public Transaction updateTransaction(Long id,
-                                         TransactionDTO dto) {
+    public Transaction updateTransaction(
+            Long id,
+            TransactionDTO dto) {
 
         Transaction transaction =
-                transactionRepository.findById(id)
+                transactionRepository
+                        .findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException("Nie znaleziono transakcji"));
+                                new RuntimeException(
+                                        "Nie znaleziono transakcji"
+                                ));
+
+        if (!transaction.getUser().getEmail()
+                .equals(getCurrentUser().getEmail())) {
+
+            throw new SecurityException(
+                    "Brak dostępu do transakcji"
+            );
+        }
 
         transaction.setAmount(dto.getAmount());
         transaction.setType(dto.getType());
@@ -62,9 +121,20 @@ public class TransactionService {
     public void deleteTransaction(Long id) {
 
         Transaction transaction =
-                transactionRepository.findById(id)
+                transactionRepository
+                        .findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException("Nie znaleziono transakcji"));
+                                new RuntimeException(
+                                        "Nie znaleziono transakcji"
+                                ));
+
+        if (!transaction.getUser().getEmail()
+                .equals(getCurrentUser().getEmail())) {
+
+            throw new SecurityException(
+                    "Brak dostępu do transakcji"
+            );
+        }
 
         transactionRepository.delete(transaction);
     }

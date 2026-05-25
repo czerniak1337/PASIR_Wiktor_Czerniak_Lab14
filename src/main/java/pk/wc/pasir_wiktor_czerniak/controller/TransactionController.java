@@ -1,11 +1,11 @@
-package pk.wc.PASIR_Wiktor_Czerniak.controller;
+package pk.wc.pasir_wiktor_czerniak.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pk.wc.PASIR_Wiktor_Czerniak.dto.TransactionDTO;
-import pk.wc.PASIR_Wiktor_Czerniak.model.Transaction;
-import pk.wc.PASIR_Wiktor_Czerniak.service.TransactionService;
+import pk.wc.pasir_wiktor_czerniak.dto.TransactionDTO;
+import pk.wc.pasir_wiktor_czerniak.model.Transaction;
+import pk.wc.pasir_wiktor_czerniak.service.TransactionService;
 
 import java.util.List;
 

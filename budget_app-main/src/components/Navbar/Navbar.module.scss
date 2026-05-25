@@ -45,4 +45,19 @@
       }
     }
   }
+
+  .logout {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: 0.3s;
+
+    &:hover {
+      color: color.scale($primary-color, $lightness: 20%);
+    }
+  }
 }

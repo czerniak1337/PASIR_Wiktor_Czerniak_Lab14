@@ -1,4 +1,4 @@
-package pk.wc.PASIR_Wiktor_Czerniak.exception;
+package pk.wc.pasir_wiktor_czerniak.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,5 +30,14 @@ public class GlobalExceptionHandler {
                 errors,
                 HttpStatus.BAD_REQUEST
         );
+    }
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<String>
+    handleUserAlreadyExists(
+            UserAlreadyExistsException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
     }
 }

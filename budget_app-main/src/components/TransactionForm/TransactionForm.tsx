@@ -12,53 +12,120 @@ interface FormData {
 }
 
 const TransactionForm = () => {
-  const { register, handleSubmit, reset } = useForm<FormData>();
 
-  const onSubmit = async (data: FormData) => {
+  const {
+    register,
+    handleSubmit,
+    reset
+  } = useForm<FormData>();
+
+  const onSubmit = async (
+      data: FormData
+  ) => {
+
     try {
-      await axiosClient.post("/transactions", data);
-      toast.success("✅ Transakcja dodana!");
+
+      await axiosClient.post(
+          "/transactions",
+          data
+      );
+
+      toast.success(
+          "✅ Transakcja dodana!"
+      );
+
       reset();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     } catch (error: any) {
-      if (error.response && error.response.status === 400) {
-        Object.values(error.response.data).forEach((msg) => {
+
+      console.log(error.response);
+
+      if (
+          error.response &&
+          error.response.status === 400
+      ) {
+
+        Object.values(
+            error.response.data
+        ).forEach((msg) => {
+
           toast.error(` ${msg}`);
+
         });
+
       } else {
-        toast.error(" Błąd podczas dodawania transakcji.");
+
+        toast.error(
+            " Błąd podczas dodawania transakcji."
+        );
       }
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className={styles["transaction-form"]}
-    >
-      <h2>Dodaj Transakcję</h2>
+      <form
+          onSubmit={handleSubmit(onSubmit)}
+          className={
+            styles["transaction-form"]
+          }
+      >
 
-      <label>Kwota:</label>
-      <input
-        {...register("amount", { required: true })}
-        type="number"
-        required
-      />
+        <h2>Dodaj Transakcję</h2>
 
-      <label>Typ:</label>
-      <select {...register("type", { required: true })} required>
-        <option value="INCOME">Przychód</option>
-        <option value="EXPENSE">Wydatek</option>
-      </select>
+        <label>Kwota:</label>
 
-      <label>Tagi:</label>
-      <input {...register("tags", { required: true })} type="text" required />
+        <input
+            {...register(
+                "amount",
+                { required: true }
+            )}
+            type="number"
+            required
+        />
 
-      <label>Notatki:</label>
-      <input {...register("notes")} type="text" />
+        <label>Typ:</label>
 
-      <button type="submit">Dodaj</button>
-    </form>
+        <select
+            {...register(
+                "type",
+                { required: true }
+            )}
+            required
+        >
+
+          <option value="INCOME">
+            Przychód
+          </option>
+
+          <option value="EXPENSE">
+            Wydatek
+          </option>
+
+        </select>
+
+        <label>Tagi:</label>
+
+        <input
+            {...register(
+                "tags",
+                { required: true }
+            )}
+            type="text"
+            required
+        />
+
+        <label>Notatki:</label>
+
+        <input
+            {...register("notes")}
+            type="text"
+        />
+
+        <button type="submit">
+          Dodaj
+        </button>
+
+      </form>
   );
 };
 

@@ -1,4 +1,4 @@
-package pk.wc.PASIR_Wiktor_Czerniak.model;
+package pk.wc.pasir_wiktor_czerniak.model;
 
 public enum TransactionType {
     INCOME,

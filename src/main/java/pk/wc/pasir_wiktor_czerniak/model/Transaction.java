@@ -1,7 +1,9 @@
-package pk.wc.PASIR_Wiktor_Czerniak.model;
+package pk.wc.pasir_wiktor_czerniak.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDateTime;
 
@@ -39,4 +41,7 @@ public class Transaction {
         this.notes = notes;
         this.timestamp = LocalDateTime.now();
     }
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

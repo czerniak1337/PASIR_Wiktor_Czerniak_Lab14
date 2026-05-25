@@ -1,8 +1,9 @@
 // src/api/authApi.ts
+import { AxiosResponse } from "axios";
 import axiosClient from './axiosClient';
 
 interface RegisterData {
-  login: string;
+  username: string;
   email: string;
   password: string;
 }
@@ -18,10 +19,10 @@ interface AuthResponse {
 }
 
 export const authApi = {
-  register: (data: RegisterData): Promise<AuthResponse> => {
-    return axiosClient.post('/register', data);
+  register: (data: RegisterData): Promise<AxiosResponse<AuthResponse>> => {
+    return axiosClient.post('auth/register', data);
   },
-  login: (data: LoginData): Promise<AuthResponse> => {
-    return axiosClient.post('/login', data);
+  login: (data: LoginData): Promise<AxiosResponse<AuthResponse>> => {
+    return axiosClient.post('auth/login', data);
   },
 };

@@ -1,13 +1,14 @@
 // src/pages/RegisterPage/RegisterPage.tsx
-import { useState, type FormEvent } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
 import { authApi } from '../../api/authApi';
 import ErrorMessage from '../../components/ErrorMessage/ErrorMessage';
 import styles from './RegisterPage.module.scss';
 
-const RegisterPage = () => {
+const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const [login, setLogin] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -16,8 +17,8 @@ const RegisterPage = () => {
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!login.trim()) {
-      newErrors.login = 'Login jest wymagany.';
+    if (!username.trim()) {
+      newErrors.username = 'username jest wymagany.';
     }
 
     if (!email.trim()) {
@@ -42,23 +43,26 @@ const RegisterPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRegister = async (e: FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({}); // Reset błędów
 
     if (!validate()) return;
 
     try {
-      await authApi.register({ login, email, password });
+      await authApi.register({ username, email, password });
       alert('Rejestracja udana. Możesz się teraz zalogować.');
       navigate('/login');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      // Obsługa błędów z backendu
-      if (error.response && error.response.data) {
-        setErrors(error.response.data.errors || { general: 'Błąd rejestracji. Spróbuj ponownie.' });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.data) {
+          const errorData = error.response.data;
+          setErrors(errorData.errors || { general: errorData.message || 'Błąd rejestracji. Spróbuj ponownie.' });
+        } else {
+          setErrors({ general: 'Błąd rejestracji. Spróbuj ponownie.' });
+        }
       } else {
-        setErrors({ general: 'Błąd rejestracji. Spróbuj ponownie.' });
+        setErrors({ general: 'Wystąpił nieznany błąd podczas rejestracji.' });
       }
     }
   };
@@ -68,15 +72,15 @@ const RegisterPage = () => {
       <h2>Rejestracja</h2>
       <form onSubmit={handleRegister} className={styles.form}>
         <div className={styles.formGroup}>
-          <label>Login:</label>
+          <label>Nazwa użytkownika:</label>
           <input
             type="text"
-            value={login}
-            onChange={(e) => setLogin(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
             className={styles.input}
           />
-          {errors.login && <ErrorMessage message={errors.login} />}
+          {errors.username && <ErrorMessage message={errors.username} />}
         </div>
         <div className={styles.formGroup}>
           <label>Email:</label>

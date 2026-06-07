@@ -40,10 +40,15 @@ public class SecurityConfig {
                         )
                 )
 
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers(
-                                "/api/auth/**"
+                                "/api/auth/**",
+                                "/graphql",
+                                "/graphql/**",
+                                "/graphiql",
+                                "/graphiql/**"
                         ).permitAll()
 
                         .anyRequest()

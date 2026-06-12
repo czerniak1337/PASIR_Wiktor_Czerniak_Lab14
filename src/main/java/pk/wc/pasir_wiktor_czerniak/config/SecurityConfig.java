@@ -48,7 +48,9 @@ public class SecurityConfig {
                                 "/graphql",
                                 "/graphql/**",
                                 "/graphiql",
-                                "/graphiql/**"
+                                "/graphiql/**",
+                                "/ws/**"
+
                         ).permitAll()
 
                         .anyRequest()

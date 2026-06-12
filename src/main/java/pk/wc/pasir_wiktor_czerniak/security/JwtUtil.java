@@ -1,8 +1,9 @@
 package pk.wc.pasir_wiktor_czerniak.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
+import pk.wc.pasir_wiktor_czerniak.model.User;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -18,10 +19,12 @@ public class JwtUtil {
 
     private final long EXPIRATION = 1000 * 60 * 60;
 
-    public String generateToken(String email) {
+    public String generateToken(User user) {
 
         return Jwts.builder()
-                .subject(email)
+                .claim("id", user.getId())
+                .claim("email", user.getEmail())
+                .subject(user.getEmail())
                 .issuedAt(new Date())
                 .expiration(
                         new Date(

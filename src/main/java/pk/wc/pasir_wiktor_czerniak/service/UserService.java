@@ -31,7 +31,7 @@ public class UserService
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
 
             throw new UserAlreadyExistsException(
-                    "Użytkownik już istnieje"
+                    "Uzytkownik już istnieje"
             );
         }
 
@@ -54,7 +54,7 @@ public class UserService
                 .findByEmail(dto.getEmail())
                 .orElseThrow(() ->
                         new RuntimeException(
-                                "Nieprawidłowy email lub hasło"
+                                "Nieprawidlowy email lub haslo"
                         )
                 );
 
@@ -68,11 +68,11 @@ public class UserService
 
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
-                    "Nieprawidłowy email lub hasło"
+                    "Nieprawidlowy email lub haslo"
             );
         }
 
-        return jwtUtil.generateToken(user.getEmail());
+        return jwtUtil.generateToken(user);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class UserService
                 .findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException(
-                                "Nie znaleziono użytkownika"
+                                "Nie znaleziono uzytkownika"
                         )
                 );
 

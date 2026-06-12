@@ -13,6 +13,34 @@ type BalanceDto {
     balance: Float
 }
 
+type Group {
+    id: ID
+    name: String
+    ownerId: ID
+}
+
+type Membership {
+    id: ID
+    userId: ID
+    groupId: ID
+    userEmail: String
+}
+
+type DebtUser {
+    id: ID
+    email: String
+}
+
+type Debt {
+    id: ID
+    amount: Float
+    title: String
+    paidByDebtor: Boolean
+    confirmedByCreditor: Boolean
+    debtor: DebtUser
+    creditor: DebtUser
+}
+
 input TransactionInput {
     amount: Float!
     type: String!
@@ -20,17 +48,77 @@ input TransactionInput {
     notes: String
 }
 
+input GroupInput {
+    name: String!
+}
+
+input MembershipInput {
+    groupId: ID!
+    userEmail: String!
+}
+
+input DebtInput {
+    debtorId: ID!
+    creditorId: ID!
+    groupId: ID!
+    amount: Float!
+    title: String!
+}
+
+input GroupTransactionInput {
+    groupId: ID!
+    amount: Float!
+    type: String!
+    title: String!
+    selectedUserIds: [ID!]
+}
+
 type Query {
     transactions: [Transaction]
     transaction(id: ID!): Transaction
     userBalance(days: Float): BalanceDto
+
+    myGroups: [Group]
+    groupMembers(groupId: ID!): [Membership]
+    groupDebts(groupId: ID!): [Debt]
 }
 
 type Mutation {
+
     addTransaction(transactionDTO: TransactionInput!): Transaction
+
     updateTransaction(
-        id: ID!,
+        id: ID!
         transactionDTO: TransactionInput!
     ): Transaction
+
     deleteTransaction(id: ID!): Boolean
+
+    createGroup(groupDTO: GroupInput!): Group
+
+    addMember(membershipDTO: MembershipInput!): Membership
+
+    removeMember(
+        membershipId: ID!
+    ): Boolean
+
+    createDebt(debtDTO: DebtInput!): Debt
+
+    addGroupTransaction(
+        groupTransactionDTO: GroupTransactionInput!
+    ): Boolean
+
+    deleteDebt(debtId: ID!): Boolean
+
+    markDebtAsPaid(
+        debtId: ID!
+    ): Debt
+
+    confirmDebtPayment(
+        debtId: ID!
+    ): Debt
+
+    deleteGroup(
+        id: ID!
+    ): Boolean
 }

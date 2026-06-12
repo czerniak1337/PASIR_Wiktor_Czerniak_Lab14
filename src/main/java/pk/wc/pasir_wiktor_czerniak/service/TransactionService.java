@@ -63,7 +63,7 @@ public class TransactionService {
                 .equals(getCurrentUser().getEmail())) {
 
             throw new SecurityException(
-                    "Brak dostępu do transakcji"
+                    "Brak dostepu do transakcji"
             );
         }
 
@@ -108,7 +108,7 @@ public class TransactionService {
                 .equals(getCurrentUser().getEmail())) {
 
             throw new SecurityException(
-                    "Brak dostępu do transakcji"
+                    "Brak dostepu do transakcji"
             );
         }
 
@@ -134,7 +134,7 @@ public class TransactionService {
                 .equals(getCurrentUser().getEmail())) {
 
             throw new SecurityException(
-                    "Brak dostępu do transakcji"
+                    "Brak dostepu do transakcji"
             );
         }
 

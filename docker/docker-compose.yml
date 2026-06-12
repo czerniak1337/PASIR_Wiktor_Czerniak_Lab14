@@ -7,7 +7,7 @@ services:
     container_name: mysql_db_spring
     restart: unless-stopped
     env_file:
-      - ../.env
+      - .env
     environment:
       # Te dane Spring i tak pobierze z .env, ale dla Dockera
       # warto upewnić się, że Twój .env je zawiera
@@ -17,7 +17,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: Europe/Warsaw
     ports:
-      - "3306:3306"
+      - "3307:3306"
     command:
       [
         "mysqld",

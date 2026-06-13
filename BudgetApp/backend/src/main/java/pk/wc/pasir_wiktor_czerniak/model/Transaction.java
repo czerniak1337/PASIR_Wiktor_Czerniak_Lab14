@@ -39,7 +39,7 @@ public class Transaction {
         this.type = type;
         this.tags = tags;
         this.notes = notes;
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = LocalDateTime.now(java.time.Clock.systemUTC());
     }
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -6,40 +6,47 @@ import org.springframework.stereotype.Component;
 import pk.wc.pasir_wiktor_czerniak.model.User;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    private final SecretKey key =
+    private static final SecretKey KEY =
             Keys.hmacShaKeyFor(
                     "wiktorczerniakpasirlab10supersecretkey123"
                             .getBytes()
             );
 
-    private final long EXPIRATION = 1000 * 60 * 60;
+    private static final long EXPIRATION_MS =
+            60L * 60 * 1000;
 
     public String generateToken(User user) {
+
+        Instant now = Instant.now();
 
         return Jwts.builder()
                 .claim("id", user.getId())
                 .claim("email", user.getEmail())
                 .subject(user.getEmail())
-                .issuedAt(new Date())
+                .issuedAt(Date.from(now))
                 .expiration(
-                        new Date(
-                                System.currentTimeMillis()
-                                        + EXPIRATION
+                        Date.from(
+                                now.plus(
+                                        EXPIRATION_MS,
+                                        ChronoUnit.MILLIS
+                                )
                         )
                 )
-                .signWith(key)
+                .signWith(KEY)
                 .compact();
     }
 
     public String extractUsername(String token) {
 
         return Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(KEY)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
@@ -51,7 +58,7 @@ public class JwtUtil {
         try {
 
             Jwts.parser()
-                    .verifyWith(key)
+                    .verifyWith(KEY)
                     .build()
                     .parseSignedClaims(token);
 

@@ -41,6 +41,6 @@ public class Membership {
     }
     @PrePersist
     public void prePersist() {
-        joinedAt = LocalDateTime.now();
+        joinedAt = LocalDateTime.now(java.time.Clock.systemUTC());
     }
 }

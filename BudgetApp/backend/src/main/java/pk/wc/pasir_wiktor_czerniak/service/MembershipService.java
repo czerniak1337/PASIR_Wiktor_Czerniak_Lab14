@@ -103,7 +103,7 @@ public class MembershipService {
             Membership membership = new Membership();
             membership.setGroup(group);
             membership.setUser(user);
-            membership.setJoinedAt(LocalDateTime.now());
+            membership.setJoinedAt(LocalDateTime.now(java.time.Clock.systemUTC()));
 
             return membershipRepository.save(membership);
 

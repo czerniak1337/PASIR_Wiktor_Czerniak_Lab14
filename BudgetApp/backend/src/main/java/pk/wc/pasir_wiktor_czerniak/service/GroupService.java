@@ -53,7 +53,7 @@ public class GroupService {
         Group group = new Group();
         group.setName(groupDTO.getName());
         group.setOwner(currentUser);
-        group.setCreatedAt(LocalDateTime.now());
+        group.setCreatedAt(LocalDateTime.now(java.time.Clock.systemUTC()));
 
         Group savedGroup = groupRepository.save(group);
 

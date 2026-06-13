@@ -65,7 +65,6 @@ class ProjectRequirementsTest {
         validator = factory.getValidator();
     }
 
-    // 1. Utworzenie grupy dodaje właściciela jako członka i zwraca ją w myGroups
     @Test
     @DisplayName("1. Utworzenie grupy dodaje właściciela jako członka i zwraca ją w myGroups")
     void utworzenieGrupyDodajeWlascicielaJakoCzlonkaIZwracaJaWMyGroups() {
@@ -152,10 +151,10 @@ class ProjectRequirementsTest {
 
         Membership membership = new Membership();
         membership.setUser(user);
-        membership.setJoinedAt(LocalDateTime.now());
+        membership.setJoinedAt(LocalDateTime.now(java.time.Clock.systemUTC()));
 
         Debt oldDebt = new Debt();
-        oldDebt.setCreatedAt(LocalDateTime.now().minusDays(2));
+        oldDebt.setCreatedAt(LocalDateTime.now(java.time.Clock.systemUTC()).minusDays(2));
 
         when(currentUserService.getCurrentUser()).thenReturn(user);
         when(membershipRepository.findByGroup_Id(1L)).thenReturn(List.of(membership));

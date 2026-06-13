@@ -21,6 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionService {
 
+    private static final String TRANSACTION_NOT_FOUND =
+            "Nie znaleziono transakcji";
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private static final Clock UTC_CLOCK = Clock.systemUTC();
@@ -44,7 +46,8 @@ public class TransactionService {
     @Transactional(readOnly = true)
     public Transaction getTransactionById(Long id) {
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono transakcji"));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(TRANSACTION_NOT_FOUND));
 
         validateOwnership(transaction);
         return transaction;
@@ -63,7 +66,8 @@ public class TransactionService {
     @Transactional
     public Transaction updateTransaction(Long id, TransactionDTO dto) {
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono transakcji"));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(TRANSACTION_NOT_FOUND));
 
         validateOwnership(transaction);
         updateTransactionFields(transaction, dto);
@@ -74,7 +78,8 @@ public class TransactionService {
     @Transactional
     public void deleteTransaction(Long id) {
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono transakcji"));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(TRANSACTION_NOT_FOUND));
 
         validateOwnership(transaction);
         transactionRepository.delete(transaction);

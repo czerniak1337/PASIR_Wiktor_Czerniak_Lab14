@@ -34,6 +34,6 @@ public class Debt {
 
     @PrePersist
     public void prePersist() {
-        createdAt = LocalDateTime.now();
+        createdAt = LocalDateTime.now(java.time.Clock.systemUTC());
     }
 }

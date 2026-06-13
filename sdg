@@ -1,0 +1,29 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 850d4aa..ddae817 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -1,6 +1,6 @@[m
+[31m-HELP.md[m
+[32m+[m[32mBudgetApp/backend/HELP.md[m
+ target/[m
+[31m-.mvn/wrapper/maven-wrapper.jar[m
+[32m+[m[32mBudgetApp/backend/.mvn/wrapper/maven-wrapper.jar[m
+ !**/src/main/**/target/[m
+ !**/src/test/**/target/[m
+ [m
+[36m@@ -33,10 +33,10 @@[m [mbuild/[m
+ .vscode/[m
+ [m
+ ### Environment Files ###[m
+[31m-docker/.env[m
+[32m+[m[32mBudgetApp/backend/.env[m
+ .env.local[m
+ .env.*.local[m
+ ### Docker ###[m
+ docker-compose.override.yml[m
+ .docker/[m
+[31m-docker/.env[m
+\ No newline at end of file[m
+[32m+[m[32mBudgetApp/backend/.env[m
+\ No newline at end of file[m

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import pk.wc.pasir_wiktor_czerniak.model.User;
 
 import javax.crypto.SecretKey;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Component
@@ -19,8 +19,8 @@ public class JwtUtil {
                             .getBytes()
             );
 
-    private static final long EXPIRATION_MS =
-            60L * 60 * 1000;
+    private static final Duration TOKEN_VALIDITY =
+            Duration.ofHours(1);
 
     public String generateToken(User user) {
 
@@ -33,10 +33,7 @@ public class JwtUtil {
                 .issuedAt(Date.from(now))
                 .expiration(
                         Date.from(
-                                now.plus(
-                                        EXPIRATION_MS,
-                                        ChronoUnit.MILLIS
-                                )
+                                now.plus(TOKEN_VALIDITY)
                         )
                 )
                 .signWith(KEY)

@@ -2,6 +2,7 @@ package pk.wc.pasir_wiktor_czerniak.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -9,6 +10,8 @@ import java.time.LocalDateTime;
 @Data
 public class Debt {
 
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Id
@@ -31,9 +34,4 @@ public class Debt {
 
     @ManyToOne
     private Group group;
-
-    @PrePersist
-    public void prePersist() {
-        createdAt = LocalDateTime.now(java.time.Clock.systemUTC());
-    }
 }

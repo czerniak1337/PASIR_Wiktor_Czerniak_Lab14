@@ -80,21 +80,22 @@ const GroupsPage: React.FC = () => {
 
       <ul className={styles.list}>
         {groups.map((group) => (
-          <li
-            key={group.id}
-            onClick={() => setSelectedGroup(group)}
-            className={styles.groupItem}
-          >
-            {group.name}
+          <li key={group.id} className={styles.groupItem}>
+            <button
+              type="button"
+              onClick={() => setSelectedGroup(group)}
+              className={styles.groupButton}
+            >
+              {group.name}
+            </button>
+
             {String(user?.id) === String(group.ownerId) && (
               <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setGroupToDelete(group);
-              }}
-              className={styles.deleteButton}
-            >
-              Usuń
+                type="button"
+                onClick={() => setGroupToDelete(group)}
+                className={styles.deleteButton}
+              >
+                Usuń
               </button>
             )}
           </li>

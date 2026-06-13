@@ -36,10 +36,10 @@ function parseJwt(token: string): User | null {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const jsonPayload = decodeURIComponent(
-      window
+      globalThis
         .atob(base64)
         .split("")
-        .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
+        ("00" + (c.codePointAt(0) ?? 0).toString(16)).slice(-2)
         .join("")
     );
     return JSON.parse(jsonPayload);
@@ -75,16 +75,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
   }, []);
 
-  const login = useCallback((token: string) => {
-    const parsedUser = parseJwt(token);
-    if (!parsedUser) {
-      console.error("Nie udało się sparsować użytkownika z tokena");
-      return;
-    }
-    localStorage.setItem("accessToken", token);
-    setIsAuthenticated(true);
-    setUser(parsedUser);
-  }, []);
+ const login = useCallback((token: string) => {
+   const parsedUser = parseJwt(token);
+
+   if (!parsedUser) {
+     console.error("Nie udało się sparsować użytkownika z tokena");
+     return;
+   }
+
+   const parts = token.split(".");
+
+   if (parts.length !== 3) {
+     console.error("Nieprawidłowy token JWT");
+     return;
+   }
+
+   globalThis.localStorage.setItem(
+     "accessToken",
+     token
+   );
+
+   setIsAuthenticated(true);
+   setUser(parsedUser);
+ }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -12,7 +12,7 @@ const GroupDebtsPage = () => {
   const [ownerId, setOwnerId] = useState<Id | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [debtToDelete, setDebtToDelete] = useState<GroupDebt | null>(null);
-  const currentUserId = user?.id !== undefined ? String(user.id) : "";
+  const currentUserId = String(user?.id ?? "");
 
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (error instanceof Error && error.message.trim()) {
@@ -102,11 +102,31 @@ const GroupDebtsPage = () => {
     debt.paidByDebtor &&
     !debt.confirmedByCreditor;
 
-  const getDebtStatusLabel = (debt: GroupDebt) => {
-    if (debt.confirmedByCreditor) return "Spłata potwierdzona";
-    if (debt.paidByDebtor) return "Oczekuje na potwierdzenie";
-    return "Nieopłacony";
-  };
+ const getDebtStatusLabel = (debt: GroupDebt) => {
+   if (debt.confirmedByCreditor) {
+     return "Spłata potwierdzona";
+   }
+
+   if (debt.paidByDebtor) {
+     return "Oczekuje na potwierdzenie";
+   }
+
+   return "Nieopłacony";
+ };
+
+ const getDebtStatusClass = (
+   debt: GroupDebt
+ ) => {
+   if (debt.confirmedByCreditor) {
+     return styles.statusPaid;
+   }
+
+   if (debt.paidByDebtor) {
+     return styles.statusPending;
+   }
+
+   return styles.statusOpen;
+ };
 
   const handleMarkDebtAsPaid = async (debtId: Id) => {
     try {
@@ -150,13 +170,7 @@ const GroupDebtsPage = () => {
             </strong>{" "}
             {debt.amount.toFixed(2)} zł za <strong>{debt.title}</strong>
             <span
-              className={`${styles.statusBadge} ${
-                debt.confirmedByCreditor
-                  ? styles.statusPaid
-                  : debt.paidByDebtor
-                    ? styles.statusPending
-                    : styles.statusOpen
-              }`}
+              className={`${styles.statusBadge} ${getDebtStatusClass(debt)}`}
             >
               {getDebtStatusLabel(debt)}
             </span>

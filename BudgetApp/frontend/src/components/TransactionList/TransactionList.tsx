@@ -84,7 +84,7 @@ const TransactionList = () => {
     const errors: { [key: string]: string } = {};
     const { amount, type, tags, notes } = editValues;
 
-    if (!amount || parseFloat(amount.toString()) <= 0) {
+    if (!amount || Number.parseFloat(amount.toString()) <= 0) {
       errors.amount = "Kwota musi być większa od zera.";
     }
 
@@ -212,14 +212,17 @@ const TransactionList = () => {
                       <option value="INCOME">Przychód</option>
                       <option value="EXPENSE">Wydatek</option>
                     </select>
+
                     {editErrors.type && (
-                      <p className={styles.error}>{editErrors.type}</p>
+                      <p className={styles.error}>
+                        {editErrors.type}
+                      </p>
                     )}
                   </>
-                ) : transaction.type === "INCOME" ? (
-                  "Przychód"
                 ) : (
-                  "Wydatek"
+                  transaction.type === "INCOME"
+                    ? "Przychód"
+                    : "Wydatek"
                 )}
               </td>
               <td>

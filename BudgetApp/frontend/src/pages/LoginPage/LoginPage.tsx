@@ -1,37 +1,41 @@
-// src/pages/LoginPage/LoginPage.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AxiosError } from 'axios';
-import { authApi } from '../../api/authApi';
-import ErrorMessage from '../../components/ErrorMessage/ErrorMessage';
-import styles from './Login.Page.module.scss';
-import { useAuth } from '../../context/AuthContext';
+
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+import { authApi } from "../../api/authApi";
+import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
+import styles from "./Login.Page.module.scss";
+import { useAuth } from "../../context/AuthContext";
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
+    setError("");
+
     try {
       const response = await authApi.login({ email, password });
       login(response.data.token);
-      navigate('/transactions');
+      navigate("/transactions");
     } catch (error) {
       if (error instanceof AxiosError) {
         if (error.response?.data) {
-          setError(typeof error.response.data === 'string' 
-            ? error.response.data 
-            : error.response.data.message || 'Błąd logowania');
+          setError(
+            typeof error.response.data === "string"
+              ? error.response.data
+              : error.response.data.message || "Błąd logowania"
+          );
         } else {
-          setError('Wystąpił błąd podczas logowania.');
+          setError("Wystąpił błąd podczas logowania.");
         }
       } else {
-        setError('Wystąpił nieznany błąd podczas logowania.');
+        setError("Wystąpił nieznany błąd podczas logowania.");
       }
     }
   };
@@ -39,29 +43,41 @@ const LoginPage: React.FC = () => {
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Logowanie</h2>
+
       <form onSubmit={handleLogin} className={styles.form}>
         <div className={styles.formGroup}>
-          <label>Email:</label>
-          <input 
-            type="email" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            required 
+          <label htmlFor="email">Email:</label>
+
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
             className={styles.input}
           />
-          {error && <ErrorMessage message={error} />}
         </div>
+
         <div className={styles.formGroup}>
-          <label>Hasło:</label>
-          <input 
-            type="password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            required 
+          <label htmlFor="password">Hasło:</label>
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
             className={styles.input}
           />
         </div>
-        <button type="submit" className={styles.button}>Zaloguj</button>
+
+        {error && <ErrorMessage message={error} />}
+
+        <button type="submit" className={styles.button}>
+          Zaloguj
+        </button>
       </form>
     </div>
   );

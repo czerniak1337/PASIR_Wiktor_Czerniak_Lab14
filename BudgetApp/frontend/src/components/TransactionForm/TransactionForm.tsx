@@ -14,6 +14,7 @@ interface FormData {
 
 const TransactionForm = () => {
   const { refreshBalance } = useBalance();
+
   const {
     register,
     handleSubmit,
@@ -31,9 +32,13 @@ const TransactionForm = () => {
     `;
 
     try {
-      await graphqlClient(mutation, { transactionDTO: data });
+      await graphqlClient(mutation, {
+        transactionDTO: data,
+      });
+
       refreshBalance(null);
       reset();
+
       toast.success("✅ Transakcja dodana!");
     } catch (error) {
       toast.error((error as Error).message);
@@ -48,8 +53,12 @@ const TransactionForm = () => {
       <h2>Dodaj Transakcję</h2>
 
       <div className={styles.formGroup}>
-        <label>Kwota:</label>
+        <label htmlFor="amount">
+          Kwota:
+        </label>
+
         <input
+          id="amount"
           type="number"
           step="0.01"
           placeholder="Kwota"
@@ -58,21 +67,30 @@ const TransactionForm = () => {
             valueAsNumber: true,
             min: {
               value: 0.01,
-              message: "Kwota musi być większa od zera",
+              message:
+                "Kwota musi być większa od zera",
             },
           })}
           className={styles.input}
         />
+
         {errors.amount && (
-          <p className={styles.error}>{errors.amount.message}</p>
+          <p className={styles.error}>
+            {errors.amount.message}
+          </p>
         )}
       </div>
 
       <div className={styles.formGroup}>
-        <label>Typ:</label>
+        <label htmlFor="type">
+          Typ:
+        </label>
+
         <select
+          id="type"
           {...register("type", {
-            required: "Typ transakcji jest wymagany",
+            required:
+              "Typ transakcji jest wymagany",
             validate: (val) =>
               val === "INCOME" ||
               val === "EXPENSE" ||
@@ -80,50 +98,85 @@ const TransactionForm = () => {
           })}
           className={styles.input}
         >
-          <option value="">-- wybierz --</option>
-          <option value="INCOME">Przychód</option>
-          <option value="EXPENSE">Wydatek</option>
+          <option value="">
+            -- wybierz --
+          </option>
+          <option value="INCOME">
+            Przychód
+          </option>
+          <option value="EXPENSE">
+            Wydatek
+          </option>
         </select>
-        {errors.type && <p className={styles.error}>{errors.type.message}</p>}
+
+        {errors.type && (
+          <p className={styles.error}>
+            {errors.type.message}
+          </p>
+        )}
       </div>
 
       <div className={styles.formGroup}>
-        <label>Tagi:</label>
+        <label htmlFor="tags">
+          Tagi:
+        </label>
+
         <input
+          id="tags"
           type="text"
           {...register("tags", {
             required: "Tagi są wymagane",
             minLength: {
               value: 2,
-              message: "Tag musi mieć co najmniej 2 znaki",
+              message:
+                "Tag musi mieć co najmniej 2 znaki",
             },
             maxLength: {
               value: 70,
-              message: "Tagi muszą mieć najwyżej 70 znaków",
+              message:
+                "Tagi muszą mieć najwyżej 70 znaków",
             },
           })}
           placeholder="np. jedzenie, transport"
           className={styles.input}
         />
-        {errors.tags && <p className={styles.error}>{errors.tags.message}</p>}
+
+        {errors.tags && (
+          <p className={styles.error}>
+            {errors.tags.message}
+          </p>
+        )}
       </div>
 
       <div className={styles.formGroup}>
-        <label>Notatki:</label>
+        <label htmlFor="notes">
+          Notatki:
+        </label>
+
         <textarea
+          id="notes"
           {...register("notes", {
             maxLength: {
               value: 200,
-              message: "Notatka może mieć maksymalnie 200 znaków",
+              message:
+                "Notatka może mieć maksymalnie 200 znaków",
             },
           })}
           placeholder="Dodatkowe informacje (opcjonalnie)"
           className={styles.textarea}
         />
-        {errors.notes && <p className={styles.error}>{errors.notes.message}</p>}
+
+        {errors.notes && (
+          <p className={styles.error}>
+            {errors.notes.message}
+          </p>
+        )}
       </div>
 
-      <button type="submit" className={styles.button}>
+      <button
+        type="submit"
+        className={styles.button}
+      >
         Dodaj
       </button>
     </form>

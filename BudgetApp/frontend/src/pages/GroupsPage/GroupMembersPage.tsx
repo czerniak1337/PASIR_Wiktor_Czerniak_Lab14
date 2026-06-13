@@ -38,9 +38,11 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
   const [debtToDelete, setDebtToDelete] = useState<GroupDebt | null>(null);
   const requestIdRef = useRef(0);
 
+  const currentUserId = String(user?.id ?? "");
+
   const isGroupOwner =
-    user?.id !== undefined && String(user.id) === String(group.ownerId);
-  const currentUserId = user?.id !== undefined ? String(user.id) : "";
+    currentUserId !== "" &&
+    currentUserId === String(group.ownerId);
 
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (error instanceof Error && error.message.trim()) {
@@ -81,7 +83,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
           );
         }
       } else {
-        console.error("Błąd pobierania członków grupy:", membersResult.reason);
+        console.error("Błąd pobierania członków grupy");
         setMembers([]);
         setErrorMessage((current) =>
           current || "Nie udało się pobrać członków grupy."
@@ -91,7 +93,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
       if (debtsResult.status === "fulfilled") {
         setDebts(debtsResult.value);
       } else {
-        console.error("Błąd pobierania długów grupy:", debtsResult.reason);
+        console.error("Błąd pobierania długów grupy");
         setDebts([]);
         setErrorMessage((current) =>
           current || "Nie udało się pobrać długów grupy."
@@ -141,7 +143,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
       setNewMemberEmail("");
       refreshMembers();
     } catch (error: unknown) {
-      console.error("Błąd dodawania członka:", error);
+      console.error("Błąd dodawania członka");
       setAddMemberError(getErrorMessage(error, "Nie udało się dodać członka."));
     }
   };
@@ -157,7 +159,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
       await groupsApi.removeMember(id);
       refreshMembers();
     } catch (error: unknown) {
-      console.error("Błąd usuwania członka:", error);
+      console.error("Błąd usuwania członka");
       setErrorMessage(
         getErrorMessage(error, "Nie udało się usunąć członka grupy.")
       );
@@ -200,7 +202,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
       setDebtAmount("");
       refreshMembers();
     } catch (error: unknown) {
-      console.error("Błąd dodawania długu:", error);
+      console.error("Błąd dodawania długu");
       setDebtFormError(getErrorMessage(error, "Nie udało się dodać długu."));
     }
   };
@@ -214,7 +216,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
       setDebtToDelete(null);
       refreshMembers();
     } catch (error: unknown) {
-      console.error("Błąd usuwania długu:", error);
+      console.error("Błąd usuwania długu");
       setErrorMessage(getErrorMessage(error, "Nie udało się usunąć długu."));
     }
   };
@@ -238,13 +240,26 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
     return "Nieopłacony";
   };
 
+  const getDebtStatusClass = (debt: GroupDebt) => {
+    if (debt.confirmedByCreditor) {
+      return styles.statusPaid;
+    }
+
+    if (debt.paidByDebtor) {
+      return styles.statusPending;
+    }
+
+    return styles.statusOpen;
+  };
+
+
   const handleMarkDebtAsPaid = async (debtId: number | string) => {
     try {
       setErrorMessage("");
       await groupsApi.markDebtAsPaid(debtId);
       refreshMembers();
     } catch (error: unknown) {
-      console.error("Błąd oznaczania długu jako opłaconego:", error);
+      console.error("Błąd oznaczania długu jako opłaconego");
       setErrorMessage(
         getErrorMessage(error, "Nie udało się oznaczyć długu jako opłaconego.")
       );
@@ -257,7 +272,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
       await groupsApi.confirmDebtPayment(debtId);
       refreshMembers();
     } catch (error: unknown) {
-      console.error("Błąd potwierdzania spłaty długu:", error);
+      console.error("Błąd potwierdzania spłaty długu");
       setErrorMessage(
         getErrorMessage(error, "Nie udało się potwierdzić spłaty długu.")
       );
@@ -389,13 +404,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
                 </strong>{" "}
                 {debt.amount.toFixed(2)} zł za <strong>{debt.title}</strong>
                 <span
-                  className={`${styles.statusBadge} ${
-                    debt.confirmedByCreditor
-                      ? styles.statusPaid
-                      : debt.paidByDebtor
-                        ? styles.statusPending
-                        : styles.statusOpen
-                  }`}
+                  className={`${styles.statusBadge} ${getDebtStatusClass(debt)}`}
                 >
                   {getDebtStatusLabel(debt)}
                 </span>

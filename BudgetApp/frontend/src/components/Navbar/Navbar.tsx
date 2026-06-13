@@ -10,38 +10,56 @@ const Navbar = () => {
       <h1 className={styles.logo}>
         <Link to="/">💰 Budget App</Link>
       </h1>
+
       <ul className={styles["nav-list"]}>
         <div className={styles["nav-container"]}>
           {isAuthenticated && (
             <>
               <li>
-                <Link to="/add-transaction">Dodaj Transakcję</Link>
+                <Link to="/add-transaction">
+                  Dodaj Transakcję
+                </Link>
               </li>
+
               <li>
-                <Link to="/transactions">Lista Transakcji</Link>
+                <Link to="/transactions">
+                  Lista Transakcji
+                </Link>
               </li>
+
               <li>
-                <Link to="/groups">Grupy</Link>
+                <Link to="/groups">
+                  Grupy
+                </Link>
               </li>
             </>
           )}
         </div>
+
         <div className={styles["nav-container"]}>
-          {!isAuthenticated ? (
-            <>
-              <li>
-                <Link to="/login">Logowanie</Link>
-              </li>
-              <li>
-                <Link to="/register">Rejestracja</Link>
-              </li>
-            </>
-          ) : (
+          {isAuthenticated ? (
             <li>
-              <button onClick={logout} className={styles.logout}>
+              <button
+                onClick={logout}
+                className={styles.logout}
+              >
                 Wyloguj
               </button>
             </li>
+          ) : (
+            <>
+              <li>
+                <Link to="/login">
+                  Logowanie
+                </Link>
+              </li>
+
+              <li>
+                <Link to="/register">
+                  Rejestracja
+                </Link>
+              </li>
+            </>
           )}
         </div>
       </ul>

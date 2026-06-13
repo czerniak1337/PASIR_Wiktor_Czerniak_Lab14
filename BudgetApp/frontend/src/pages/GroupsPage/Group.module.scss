@@ -82,6 +82,14 @@
   }
 }
 
+.groupButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
 .deleteButton {
   padding: 0.5rem 1rem;
   background-color: $secondary-color;
@@ -99,8 +107,8 @@
 }
 
 .backButton {
-  background-color: gray;
-  color: white;
+  background-color: #4b5563;
+  color: #ffffff;
   border: none;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
@@ -110,7 +118,7 @@
   transition: background 0.3s;
 
   &:hover {
-    background-color: darkgray;
+    background-color: #374151;
   }
 }
 

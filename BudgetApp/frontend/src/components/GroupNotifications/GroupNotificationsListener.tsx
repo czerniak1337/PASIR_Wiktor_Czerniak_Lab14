@@ -14,46 +14,90 @@ interface GroupNotification {
 }
 
 const getWebSocketUrl = (token: string) => {
-  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-  return `${protocol}://localhost:8080/ws/group-notifications?token=${encodeURIComponent(token)}`;
+  const protocol =
+    globalThis.location.protocol === "https:"
+      ? "wss"
+      : "ws";
+
+  const encodedToken =
+    encodeURIComponent(token);
+
+  return `${protocol}://localhost:8080/ws/group-notifications?token=${encodedToken}`;
 };
 
 const GroupNotificationsListener = () => {
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      return;
+    }
 
-    const token = localStorage.getItem("accessToken");
-    if (!token) return;
+    const token =
+      globalThis.localStorage.getItem(
+        "accessToken"
+      );
 
-    const socket = new WebSocket(getWebSocketUrl(token));
+    if (!token) {
+      return;
+    }
+
+    const socketUrl =
+      getWebSocketUrl(token);
+
+    const socket =
+      new WebSocket(socketUrl);
 
     socket.onmessage = (event) => {
-
-      console.log("RAW WS DATA:", event.data);
+      console.log(
+        "RAW WS DATA:",
+        event.data
+      );
 
       try {
-        const notification = JSON.parse(event.data) as GroupNotification;
+        const notification =
+          JSON.parse(
+            event.data
+          ) as GroupNotification;
 
-        console.log("PARSED:", notification);
+        console.log(
+          "PARSED:",
+          notification
+        );
 
-        if (notification.type === "GROUP_EXPENSE_ADDED") {
-          console.log("SHOWING TOAST");
-          console.log("TOAST MESSAGE:", notification.message);
+        if (
+          notification.type ===
+          "GROUP_EXPENSE_ADDED"
+        ) {
+          console.log(
+            "SHOWING TOAST"
+          );
 
-          toast.info(notification.message, {
-            autoClose: false,
-          });
+          console.log(
+            "TOAST MESSAGE:",
+            notification.message
+          );
+
+          toast.info(
+            notification.message,
+            {
+              autoClose: false,
+            }
+          );
         }
-
       } catch (error) {
-        console.error("Nie udało się obsłużyć komunikatu grupowego:", error);
+        console.error(
+          "Nie udało się obsłużyć komunikatu grupowego:",
+          error
+        );
       }
     };
 
     socket.onerror = (error) => {
-      console.error("Błąd połączenia WebSocket z komunikatami grupowymi:", error);
+      console.error(
+        "Błąd połączenia WebSocket z komunikatami grupowymi:",
+        error
+      );
     };
 
     return () => {

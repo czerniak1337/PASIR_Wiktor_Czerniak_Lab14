@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import pk.wc.pasir_wiktor_czerniak.model.User;
 
 import javax.crypto.SecretKey;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -22,25 +23,25 @@ public class JwtUtil {
     private static final Duration TOKEN_VALIDITY =
             Duration.ofHours(1);
 
+    private static final Clock UTC_CLOCK =
+            Clock.systemUTC();
+
+
     private static Date toDate(Instant instant) {
         return Date.from(instant);
     }
 
     public String generateToken(User user) {
 
-        Instant now = Instant.now();
-
-        Date issuedAt = toDate(now);
-        Date expiration = toDate(
-                now.plus(TOKEN_VALIDITY)
-        );
+        Instant now = Instant.now(UTC_CLOCK);
+        Instant expirationTime = now.plus(TOKEN_VALIDITY);
 
         return Jwts.builder()
                 .claim("id", user.getId())
                 .claim("email", user.getEmail())
                 .subject(user.getEmail())
-                .issuedAt(issuedAt)
-                .expiration(expiration)
+                .issuedAt(toDate(now))
+                .expiration(toDate(expirationTime))
                 .signWith(KEY)
                 .compact();
     }

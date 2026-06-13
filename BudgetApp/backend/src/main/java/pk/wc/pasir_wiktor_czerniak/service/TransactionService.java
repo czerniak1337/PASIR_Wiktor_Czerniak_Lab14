@@ -1,8 +1,10 @@
 package pk.wc.pasir_wiktor_czerniak.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pk.wc.pasir_wiktor_czerniak.dto.BalanceDto;
 import pk.wc.pasir_wiktor_czerniak.dto.TransactionDTO;
 import pk.wc.pasir_wiktor_czerniak.model.Transaction;
@@ -11,189 +13,104 @@ import pk.wc.pasir_wiktor_czerniak.model.User;
 import pk.wc.pasir_wiktor_czerniak.repository.TransactionRepository;
 import pk.wc.pasir_wiktor_czerniak.repository.UserRepository;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
-
     private final UserRepository userRepository;
-
-    public TransactionService(
-            TransactionRepository transactionRepository,
-            UserRepository userRepository) {
-
-        this.transactionRepository = transactionRepository;
-        this.userRepository = userRepository;
-    }
+    private static final Clock UTC_CLOCK = Clock.systemUTC();
 
     private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        Authentication auth =
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication();
-
-        String email = auth.getName();
-
-        return userRepository
-                .findByEmail(email)
-                .orElseThrow();
-    }
-
-    public List<Transaction> getAllTransactions() {
-
-        User user = getCurrentUser();
-
-        return transactionRepository.findByUser(user);
-    }
-
-    public Transaction getTransactionById(Long id) {
-
-        Transaction transaction =
-                transactionRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Nie znaleziono transakcji"
-                                ));
-
-        if (!transaction.getUser().getEmail()
-                .equals(getCurrentUser().getEmail())) {
-
-            throw new SecurityException(
-                    "Brak dostepu do transakcji"
-            );
+        if (auth == null || auth.getName() == null) {
+            throw new IllegalStateException("Użytkownik nie jest zalogowany");
         }
 
+        return userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new IllegalStateException("Użytkownik nie znaleziony"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Transaction> getAllTransactions() {
+        return transactionRepository.findByUser(getCurrentUser());
+    }
+
+    @Transactional(readOnly = true)
+    public Transaction getTransactionById(Long id) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono transakcji"));
+
+        validateOwnership(transaction);
         return transaction;
     }
 
-    public Transaction createTransaction(
-            TransactionDTO dto) {
-
-        Transaction transaction =
-                new Transaction();
-
-        transaction.setAmount(dto.getAmount());
-        transaction.setType(dto.getType());
-        transaction.setTags(dto.getTags());
-        transaction.setNotes(dto.getNotes());
-        transaction.setTimestamp(
-                LocalDateTime.now()
-        );
-
-        transaction.setUser(
-                getCurrentUser()
-        );
-
-        return transactionRepository
-                .save(transaction);
-    }
-
-    public Transaction updateTransaction(
-            Long id,
-            TransactionDTO dto) {
-
-        Transaction transaction =
-                transactionRepository
-                        .findById(id)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Nie znaleziono transakcji"
-                                ));
-
-        if (!transaction.getUser().getEmail()
-                .equals(getCurrentUser().getEmail())) {
-
-            throw new SecurityException(
-                    "Brak dostepu do transakcji"
-            );
-        }
-
-        transaction.setAmount(dto.getAmount());
-        transaction.setType(dto.getType());
-        transaction.setTags(dto.getTags());
-        transaction.setNotes(dto.getNotes());
+    @Transactional
+    public Transaction createTransaction(TransactionDTO dto) {
+        Transaction transaction = new Transaction();
+        updateTransactionFields(transaction, dto);
+        transaction.setTimestamp(LocalDateTime.now(UTC_CLOCK));
+        transaction.setUser(getCurrentUser());
 
         return transactionRepository.save(transaction);
     }
 
+    @Transactional
+    public Transaction updateTransaction(Long id, TransactionDTO dto) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono transakcji"));
+
+        validateOwnership(transaction);
+        updateTransactionFields(transaction, dto);
+
+        return transactionRepository.save(transaction);
+    }
+
+    @Transactional
     public void deleteTransaction(Long id) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono transakcji"));
 
-        Transaction transaction =
-                transactionRepository
-                        .findById(id)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Nie znaleziono transakcji"
-                                ));
-
-        if (!transaction.getUser().getEmail()
-                .equals(getCurrentUser().getEmail())) {
-
-            throw new SecurityException(
-                    "Brak dostepu do transakcji"
-            );
-        }
-
+        validateOwnership(transaction);
         transactionRepository.delete(transaction);
     }
 
-    public BalanceDto getUserBalance(
-            Double days
-    ) {
-
+    @Transactional(readOnly = true)
+    public BalanceDto getUserBalance(Double days) {
         User user = getCurrentUser();
+        List<Transaction> transactions = (days == null)
+                ? transactionRepository.findByUser(user)
+                : transactionRepository.findByUserAndTimestampAfter(
+                user, LocalDateTime.now(UTC_CLOCK).minusSeconds((long) (days * 24 * 60 * 60)));
 
-        List<Transaction> transactions;
+        double totalIncome = calculateTotal(transactions, TransactionType.INCOME);
+        double totalExpense = calculateTotal(transactions, TransactionType.EXPENSE);
 
-        if (days == null) {
+        return new BalanceDto(totalIncome, totalExpense, totalIncome - totalExpense);
+    }
 
-            transactions =
-                    transactionRepository.findByUser(user);
-
-        } else {
-
-            LocalDateTime fromDate =
-                    LocalDateTime.now()
-                            .minusSeconds(
-                                    (long) (days * 24 * 60 * 60)
-                            );
-
-            transactions =
-                    transactionRepository
-                            .findByUserAndTimestampAfter(
-                                    user,
-                                    fromDate
-                            );
+    private void validateOwnership(Transaction transaction) {
+        if (!transaction.getUser().getEmail().equals(getCurrentUser().getEmail())) {
+            throw new SecurityException("Brak dostępu do transakcji");
         }
+    }
 
-        double totalIncome =
-                transactions.stream()
-                        .filter(t ->
-                                t.getType()
-                                        == TransactionType.INCOME)
-                        .mapToDouble(
-                                Transaction::getAmount
-                        )
-                        .sum();
+    private void updateTransactionFields(Transaction transaction, TransactionDTO dto) {
+        transaction.setAmount(dto.getAmount());
+        transaction.setType(dto.getType());
+        transaction.setTags(dto.getTags());
+        transaction.setNotes(dto.getNotes());
+    }
 
-        double totalExpense =
-                transactions.stream()
-                        .filter(t ->
-                                t.getType()
-                                        == TransactionType.EXPENSE)
-                        .mapToDouble(
-                                Transaction::getAmount
-                        )
-                        .sum();
-
-        return new BalanceDto(
-                totalIncome,
-                totalExpense,
-                totalIncome - totalExpense
-        );
+    private double calculateTotal(List<Transaction> transactions, TransactionType type) {
+        return transactions.stream()
+                .filter(t -> t.getType() == type)
+                .mapToDouble(Transaction::getAmount)
+                .sum();
     }
 }

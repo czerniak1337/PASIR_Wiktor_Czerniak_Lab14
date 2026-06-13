@@ -1,11 +1,10 @@
 package pk.wc.pasir_wiktor_czerniak.exception;
 
-public class UserAlreadyExistsException
-        extends RuntimeException {
+import org.jspecify.annotations.NonNull;
 
-    public UserAlreadyExistsException(
-            String message) {
+public class UserAlreadyExistsException extends RuntimeException {
 
+    public UserAlreadyExistsException(@NonNull final String message) {
         super(message);
     }
 }

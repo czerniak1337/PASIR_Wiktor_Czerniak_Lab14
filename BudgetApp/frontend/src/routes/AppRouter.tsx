@@ -20,9 +20,6 @@ import GroupNotificationsListener from "../components/GroupNotifications/GroupNo
 
 const App = () => {
 
-  useEffect(() => {
-    toast.info("TEST TOAST");
-  }, []);
 
   return (
     <Router>

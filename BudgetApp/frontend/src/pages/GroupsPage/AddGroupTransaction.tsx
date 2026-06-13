@@ -30,7 +30,7 @@ const AddGroupTransaction = ({
   const [selectedUserIds, setSelectedUserIds] = useState<Id[]>([]);
   const [hasCustomParticipants, setHasCustomParticipants] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const currentUserId = user?.id !== undefined ? String(user.id) : "";
+  const currentUserId = String(user?.id ?? "");
 
   const memberIds = useMemo(() => members.map((member) => member.userId), [members]);
   const effectiveSelectedUserIds =

@@ -146,6 +146,14 @@ const TransactionList = () => {
     setShowDeleteModal(true);
   };
 
+  const getTransactionTypeLabel = (type: string) => {
+    if (type === "INCOME") {
+      return "Przychód";
+    }
+
+    return "Wydatek";
+  };
+
   const deleteTransaction = async () => {
     if (!transactionToDelete) return;
 
@@ -165,6 +173,9 @@ const TransactionList = () => {
     setShowDeleteModal(false);
     setTransactionToDelete(null);
   };
+
+
+
 
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
@@ -220,9 +231,7 @@ const TransactionList = () => {
                     )}
                   </>
                 ) : (
-                  transaction.type === "INCOME"
-                    ? "Przychód"
-                    : "Wydatek"
+                  getTransactionTypeLabel(transaction.type)
                 )}
               </td>
               <td>

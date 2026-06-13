@@ -1,6 +1,6 @@
-HELP.md
+BudgetApp/backend/HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
+BudgetApp/backend/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -33,10 +33,10 @@ build/
 .vscode/
 
 ### Environment Files ###
-docker/.env
+BudgetApp/backend/.env
 .env.local
 .env.*.local
 ### Docker ###
 docker-compose.override.yml
 .docker/
-docker/.env
+BudgetApp/backend/.env

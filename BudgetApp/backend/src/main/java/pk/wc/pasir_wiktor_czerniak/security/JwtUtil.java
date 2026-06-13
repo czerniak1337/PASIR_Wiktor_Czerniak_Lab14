@@ -22,20 +22,25 @@ public class JwtUtil {
     private static final Duration TOKEN_VALIDITY =
             Duration.ofHours(1);
 
+    private static Date toDate(Instant instant) {
+        return Date.from(instant);
+    }
+
     public String generateToken(User user) {
 
         Instant now = Instant.now();
+
+        Date issuedAt = toDate(now);
+        Date expiration = toDate(
+                now.plus(TOKEN_VALIDITY)
+        );
 
         return Jwts.builder()
                 .claim("id", user.getId())
                 .claim("email", user.getEmail())
                 .subject(user.getEmail())
-                .issuedAt(Date.from(now))
-                .expiration(
-                        Date.from(
-                                now.plus(TOKEN_VALIDITY)
-                        )
-                )
+                .issuedAt(issuedAt)
+                .expiration(expiration)
                 .signWith(KEY)
                 .compact();
     }

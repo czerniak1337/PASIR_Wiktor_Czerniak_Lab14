@@ -2,6 +2,8 @@ package pk.wc.pasir_wiktor_czerniak.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -12,22 +14,25 @@ import pk.wc.pasir_wiktor_czerniak.websocket.WebSocketSessionManager;
 @RequiredArgsConstructor
 public class GroupNotificationService {
 
+    private static final Logger log =
+            LoggerFactory.getLogger(GroupNotificationService.class);
+
     private final WebSocketSessionManager sessionManager;
     private final ObjectMapper objectMapper;
-
 
     public void sendToUser(
             String email,
             GroupNotificationDto dto
     ) {
 
-        System.out.println("SENDING TO " + email);
+        log.info("SENDING TO {}", email);
 
         WebSocketSession session =
                 sessionManager.getSession(email);
 
-        System.out.println(
-                "SESSION FOUND = " + (session != null)
+        log.info(
+                "SESSION FOUND = {}",
+                session != null
         );
 
         try {
@@ -41,10 +46,11 @@ public class GroupNotificationService {
                             objectMapper.writeValueAsString(dto)
                     )
             );
-            System.out.println("MESSAGE SENT");
+
+            log.info("MESSAGE SENT");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to send WebSocket message", e);
         }
     }
 }

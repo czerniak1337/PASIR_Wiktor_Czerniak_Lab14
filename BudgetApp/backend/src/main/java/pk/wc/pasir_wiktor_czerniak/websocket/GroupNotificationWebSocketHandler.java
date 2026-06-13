@@ -1,8 +1,11 @@
 package pk.wc.pasir_wiktor_czerniak.websocket;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.*;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import pk.wc.pasir_wiktor_czerniak.security.JwtUtil;
 
@@ -10,6 +13,11 @@ import pk.wc.pasir_wiktor_czerniak.security.JwtUtil;
 @RequiredArgsConstructor
 public class GroupNotificationWebSocketHandler
         extends TextWebSocketHandler {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(
+                    GroupNotificationWebSocketHandler.class
+            );
 
     private final JwtUtil jwtUtil;
     private final WebSocketSessionManager sessionManager;
@@ -21,23 +29,31 @@ public class GroupNotificationWebSocketHandler
 
         try {
 
-            System.out.println("WS CONNECT ATTEMPT");
-            System.out.println(session.getUri());
+            log.info("WS CONNECT ATTEMPT");
+
+            if (session.getUri() == null) {
+                return;
+            }
+
+            log.info("URI = {}", session.getUri());
 
             String query =
                     session.getUri().getQuery();
 
-            System.out.println("QUERY = " + query);
+            if (query == null ||
+                    !query.startsWith("token=")) {
+                return;
+            }
+
+            log.info("QUERY = {}", query);
 
             String token =
                     query.substring(6);
 
-            System.out.println("TOKEN RAW = " + token);
-
             boolean valid =
                     jwtUtil.validateToken(token);
 
-            System.out.println("TOKEN VALID = " + valid);
+            log.info("TOKEN VALID = {}", valid);
 
             if (!valid) {
                 return;
@@ -46,17 +62,22 @@ public class GroupNotificationWebSocketHandler
             String email =
                     jwtUtil.extractUsername(token);
 
-            System.out.println("EMAIL = " + email);
+            log.info("EMAIL = {}", email);
 
             sessionManager.register(
                     email,
                     session
             );
 
-            System.out.println("SESSION REGISTERED");
+            log.info("SESSION REGISTERED");
 
         } catch (Exception e) {
-            e.printStackTrace();
+
+            log.error(
+                    "Error during WebSocket connection",
+                    e
+            );
+
         }
     }
 
@@ -65,6 +86,10 @@ public class GroupNotificationWebSocketHandler
             WebSocketSession session,
             CloseStatus status
     ) {
+
+        if (session.getUri() == null) {
+            return;
+        }
 
         String query =
                 session.getUri().getQuery();
@@ -77,33 +102,22 @@ public class GroupNotificationWebSocketHandler
         String token =
                 query.substring(6);
 
-        System.out.println("TOKEN VALID = " +
-                jwtUtil.validateToken(token));
-
-        String email =
-                jwtUtil.extractUsername(token);
-
-        System.out.println("EMAIL = " + email);
-
         boolean valid =
                 jwtUtil.validateToken(token);
 
-        System.out.println("TOKEN VALID = " + valid);
+        log.info("TOKEN VALID = {}", valid);
 
         if (!valid) {
             return;
         }
 
-        sessionManager.unregister(
-                jwtUtil.extractUsername(token)
-        );
+        String email =
+                jwtUtil.extractUsername(token);
 
-        System.out.println("WS USER = " + email);
+        log.info("EMAIL = {}", email);
 
-        sessionManager.register(email, session);
+        sessionManager.unregister(email);
 
-        System.out.println("SESSION REGISTERED");
+        log.info("WS USER DISCONNECTED = {}", email);
     }
-
-
 }

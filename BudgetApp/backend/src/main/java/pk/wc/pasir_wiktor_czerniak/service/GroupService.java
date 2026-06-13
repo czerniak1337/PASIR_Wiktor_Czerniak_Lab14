@@ -28,13 +28,15 @@ public class GroupService {
     // Pobieramy rolę zalogowanego użytkownika wprost ze Spring Security (omijamy model User)
     private boolean isAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getAuthorities() == null) {
+        if (auth == null) {
             return false;
         }
         return auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ADMIN") ||
-                        a.getAuthority().equals("ROLE_ADMIN") ||
-                        a.getAuthority().equalsIgnoreCase("admin"));
+                .anyMatch(a ->
+                        "ADMIN".equals(a.getAuthority()) ||
+                                "ROLE_ADMIN".equals(a.getAuthority()) ||
+                                "admin".equalsIgnoreCase(a.getAuthority())
+                );
     }
 
     public List<Group> getAllGroups() {
@@ -66,11 +68,18 @@ public class GroupService {
     @Transactional
     public void deleteGroup(Long groupId) {
         User currentUser = currentUserService.getCurrentUser();
-        Group group = groupRepository.findById(groupId).orElseThrow();
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Nie znaleziono grupy o ID: " + groupId
+                        )
+                );
 
         // Jeśli to NIE jest właściciel i jednocześnie NIE jest admin, wyrzuć błąd
         if (!group.getOwner().getId().equals(currentUser.getId()) && !isAdmin()) {
-            throw new RuntimeException("Tylko właściciel lub admin może usunąć grupę");
+            throw new SecurityException(
+                    "Tylko właściciel lub admin może usunąć grupę"
+            );
         }
 
         debtRepository.deleteByGroupId(groupId);

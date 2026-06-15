@@ -89,6 +89,21 @@ const AddGroupTransaction = ({
       ];
     });
   };
+
+  const getErrorMessage = (
+    error: unknown,
+    fallback: string
+  ) => {
+    if (error instanceof Error && error.message.trim()) {
+      return error.message.replace(
+        /^Wystąpił błąd:\s*/i,
+        ""
+      );
+    }
+
+    return fallback;
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const parsedAmount = Number(amount);

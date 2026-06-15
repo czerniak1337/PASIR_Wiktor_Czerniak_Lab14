@@ -39,7 +39,10 @@ function parseJwt(token: string): User | null {
       globalThis
         .atob(base64)
         .split("")
-        ("00" + (c.codePointAt(0) ?? 0).toString(16)).slice(-2)
+        .map(
+          (c) =>
+            `%${("00" + (c.codePointAt(0) ?? 0).toString(16)).slice(-2)}`
+        )
         .join("")
     );
     return JSON.parse(jsonPayload);
